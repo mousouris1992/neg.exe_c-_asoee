@@ -96,7 +96,21 @@ bool imaging::WritePPM(const float * data, int w, int h, const char * filename) 
 
 	outfile.open(newfilename, std::ofstream::out);
 	
+	/*
+	std::ofstream outfile;
+	outfile.open(filename, std::ios::binary);
 
+	outfile << "P6 " << w << " " << h << " " << "255 ";
+	float temp;
+	char byte;
+	for (int i = 0; i < w*h * 3; i++) {
+		temp = data[i] * 255.0f;
+		byte = (char)temp;
+		outfile << byte;
+	}
+	
+	return true;
+	*/
 
 	return true;
 }
