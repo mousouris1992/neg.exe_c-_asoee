@@ -82,7 +82,22 @@ float * imaging::ReadPPM(const char * filename, int * w, int * h) {
 
 
 bool imaging::WritePPM(const float * data, int w, int h, const char * filename) {
+	if (data = nullptr) {
+		std::cerr << "Error, could not write neg file.\n";
+		return true;
+	}
+	
+	std::ofstream outfile; // starting open file operation
+	
+	// New name of the file that will be written. Kind(!) of like: Image01_neg.ppm
+	std::string newfilename = filename;
+	size_t pos = newfilename.find(".");
+	newfilename.substr(pos)+="_neg.ppm"; // NA PEIRAMATISTW STO DEV NA KSERW OTI EINAI SWSTO
+
+	outfile.open(newfilename, std::ofstream::out);
+	
+
 
 	return true;
-
 }
+
