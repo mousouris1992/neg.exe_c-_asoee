@@ -274,6 +274,32 @@ bool Image::load(const std::string & filename, const std::string & format) {
 
 bool Image::save(const std::string & filename, const std::string & format) {
 
+	if (format != "ppm") {
+		std::cerr << "Format is not a <ppm> , cannot save file !" << std::endl;
+	}
+
+	/*Casting Color * buffer to float * array */
+	float * f_array = new float[width*height * 3];
+
+	unsigned int pointer = 0;
+	for (unsigned int i = 0; i < width*height; i++) {
+
+		for (unsigned int j = pointer; j < pointer + 3; j++) {
+			f_array[j] = buffer[i][j - pointer];
+		}
+		pointer += 3;
+
+	}
+
+	std::cout << "Pointer is : " << pointer << std::endl;
+	std::cout << "Float * size is : " << width*height * 3 << std::endl;
+
+	const float * f_ar = f_array;
+
+	/*Calling WritePPM() once the float * array is ready */
+	imaging::WritePPM(f_ar, width, height, filename.c_str());
+
+	
 
 
 	return true;
