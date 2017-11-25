@@ -20,27 +20,24 @@ Color * Image::getRawDataPtr() {
 
 
 
-Color Image::getPixel(unsigned int x, unsigned int y) const {
-	
-	if (x*width + y >= height * width) {
-		std::cout << "~[Error] : Requested [x][y] {R,G,B} is out of expected [" << width<<"] x ["<<height << "] bounds !\n          -Returning default Color{0,0,0} !" << std::endl;
-		return Color(0, 0, 0);
-	}
 
-	return buffer[x*width + y];
+Color Image::getPixel(unsigned int x, unsigned int y) const { 
 
+	// Bound checking:
+	if (x > (this->height) || y > (this->width) ) std::cerr << "Error, x and y coordinates out of bounds.\n";
+	else return buffer[this->height*( x ) + y]; // estw a=[1,2,3  ,4,5,6   ,7,8,9] gia na exw prosvash sto '8' : a[#sthlwn*arithmo grammhs+arithmo sthlhs]
 }
+
+
 
 void Image::setPixel(unsigned int x, unsigned int y, Color & value) {
-
-	if (x*width + y >= height * width) {
-		std::cout << "~[Error] : Requested [x][y] {R,G,B} is out of expected [" << width << "] x [" << height << "] bounds !\n          -Aborting procedure !" << std::endl;
-	}
-	else {
-		buffer[x*width + y] = value;
-	}
-
+	// Bound checking:
+	if (x >(this->height) || y >(this->width) ) std::cerr << "Error, x and y coordinates out of bounds.\n";
+	imaging::Image::getPixel(x, y)[0] = value[0]; // buffer.r = value.r
+	imaging::Image::getPixel(x, y)[1] = value[1]; // buffer.g = value.g
+	imaging::Image::getPixel(x, y)[2] = value[2]; // buffer.b = value.b
 }
+
 
 void Image::setData(const Color * & data_ptr) {
 
@@ -272,10 +269,35 @@ bool Image::load(const std::string & filename, const std::string & format) {
 
 
 
+
 bool Image::save(const std::string & filename, const std::string & format) {
 
+		/*Checking if File has the 'ppm' Extension*/
+	if (format != "ppm") {
+		std::cerr << "File is not a supportable Format" << std::endl;
+		return false;
+	}
 
-
+	/*------------ Turning buffer to negative ----------------------*/
+	const imaging::Color white(1, 1, 1); // A Color object that will be used to do the thing {1,1,1}-pixel thing. RGB={1,1,1} means this pixel is white
+	for (unsigned int i = 0; i < height; i++) {
+		for (unsigned int j = 0; j < width; j++) {
+			setPixel(i,j,white - getPixel(i, j));
+		}
+	}
+	
+	/*------------------ from Color buffer to float array -------------------------*/
+	float* farray = new float[height*width * 3];
+	for (unsigned int i = 0; i < height*width; i+=3) {
+		for (unsigned int counter = 0; counter < 3; counter++) {	
+			farray[i+counter] = buffer[i][counter];
+		}
+	}
+	const float* write_array = &farray[0];
+	
+	/*------------- WritePPM can now get called-----------------------------------*/	
+	const char* c = filename.c_str();
+	imaging::WritePPM(write_array,width,height, c);
 	return true;
 }
 
