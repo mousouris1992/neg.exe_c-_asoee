@@ -34,46 +34,54 @@ int main(int argc, char *argv[]) {
 	size_t pos = filename.find(".");
 	string format = filename.substr(pos+1);
 	transform(format.begin(), format.end(), format.begin(), ::tolower);
-
+	//filename = "images/" + filename;
+	/* - - - - - */
+	
 	imaging::Image img;
 	img.load(filename, format);
 
-	/* v1----->Transforming Image to Neg 1.0v from main without copying getRawData() etc.*/
+	imaging::Color def_color(1.0f, 1.0f, 1.0f);
 
-	int size = img.getHeight()*img.getWidth();
-	//imaging::Color * color_data = img.getRawDataPtr();
-
-
-	/*for (int i = 0; i < img.getHeight(); i++) {
+	/* ___v1.0___ : Transforming Image to Neg without using getRawData()\setData() 
+	 
+	for (int i = 0; i < img.getHeight(); i++) {
 		for (int j = 0; j < img.getWidth(); j++) {
 
+			//img.setPixel(i, j, def_color - img.getPixel(i, j));
+			/*___v1.2___ 
 			imaging::Color pixel = img.getPixel(i, j);
-			img.setPixel(i, j, imaging::Color(1.0f - pixel[0], 1.0f - pixel[1], 1.0f - pixel[2])); //--v1.2 na xrhsimopoihsoume Color.+/- gia tis pra3eis.
-
+			img.setPixel(i, j, imaging::Color(1.0f - pixel[0], 1.0f - pixel[1], 1.0f - pixel[2]));
+			
 		}
 	}
 
-	imaging::Color * color_data = img.getRawDataPtr();
+	/*-----------------------------------------------------------------------------*/
+
+	/* ___v2.0___ : Transforming Image to Neg by using getDataPtr()\setDataPtr() [FASTER]
+	  */
+	imaging::Color * c_ar = img.getRawDataPtr();
+	int size = img.getHeight()*img.getWidth();
+
+	for (int i = 0; i < size; i++) {
+
+		c_ar[i] = def_color - c_ar[i];
+	}
+	const imaging::Color * c_const_ar = c_ar;
+	img.setData(c_const_ar);
 	
-	/*for (int i = 0; i < size; i++) {
-		for (int j = 0; j < 3; j++) {
-			cout << color_data[i][j] << endl;
-		}
-		cout << "Press any key to continue";
+	/*--------------------------------------------------*/
+  
+
+	filename = filename.substr(0, pos);
+	filename = filename + "_neg.ppm";
+	format = "ppm";
+
+	if (!img.save(filename, format)) {
 		system("pause");
+		return -1;
 	}
-	*/
 
-	/*v2------->Transforming image to neg through copying ar from getRawData but not using Images.methods() this way*/
-
-
-	
-
-
-
-	int a;
-	cin >> a;
-
+	system("pause");
 
 	return 0;
 }
