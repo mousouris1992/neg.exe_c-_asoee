@@ -22,7 +22,6 @@ std::ifstream infile;
 
 	int counter = 0;
 	while (counter < 4) { /*Skiping Header*/
-
 		if (infile.peek() == ' ' || infile.peek() == '\n') {
 			counter++;
 		}
@@ -126,7 +125,13 @@ bool imaging::WritePPM(const float * data, int w, int h, const char * filename) 
 	}
 
 	std::ofstream outfile;
-	outfile.open(filename, std::ios::binary);
+	// New name of the file that will be written. Kind(!) of like: Image01_neg.ppm
+	std::string newfilename = filename;
+	size_t pos = newfilename.find(".");
+	newfilename = newfilename.substr(0, pos) + "_neg.ppm";
+	
+
+	outfile.open(newfilename, std::ios::binary);
 	if (!outfile.is_open()) {
 		std::cerr << "~[Error] /WritePPM()/ : Error occured while trying to open new File !" << std::endl << std::endl;
 		return false;
@@ -163,22 +168,3 @@ bool imaging::WritePPM(const float * data, int w, int h, const char * filename) 
 		byte = (char)temp;
 		outfile << byte;	
 	}*/
-
-
-	/*-----------------YLOPOIHSH_ALEX------------------
-	if (data = nullptr) {
-	std::cerr << "Error, could not write neg file.\n";
-	return true;
-	}
-
-	std::ofstream outfile; // starting open file operation
-
-	// New name of the file that will be written. Kind(!) of like: Image01_neg.ppm
-	std::string newfilename = filename;
-	size_t pos = newfilename.find(".");
-	newfilename.substr(pos)+="_neg.ppm"; // NA PEIRAMATISTW STO DEV NA KSERW OTI EINAI SWSTO
-
-	outfile.open(newfilename, std::ofstream::out);
-	*/
-}
-
