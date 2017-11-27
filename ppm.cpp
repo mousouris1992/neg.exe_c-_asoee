@@ -38,7 +38,11 @@ std::ifstream infile;
 
 	infile.read(bytes, size); /*reading bytes from file, in a block of size [width]x[height]x[3]*/
 
-	if (infile.peek() != EOF) { /* Checking if next byte is EOF */
+	/* Checking if next byte is EOF , Afoy teleiwsei to read() , koitazoyme ean to epomeno akrivws byte einai to EOF
+	k efoson einai , tote ola leitourgoun swsta, mporeis na 9ewrhseis k auto san ena eidos poiohtikoy elegxou ean k den einai
+	ana byte */
+	
+	if (infile.peek() != EOF) { 
 		std::cerr << "~[Error] /readPPM()/ : Error occured while reading Image's data , [width] x [height] x [3] size isn't compatible with the read block !" << std::endl << std::endl;
 		return nullptr;
 	}
@@ -101,6 +105,7 @@ std::ifstream infile;
 
 
 bool imaging::WritePPM(const float * data, int w, int h, const char * filename) {
+	
 	if (data == nullptr) {
 		std::cerr << "~[Error] /WritePPM()/ : float * data points to nullptr !" << std::endl << std::endl;
 		return false;
@@ -120,6 +125,12 @@ bool imaging::WritePPM(const float * data, int w, int h, const char * filename) 
 	}
 
 	/*Writing Header*/
+	
+	/*Edw sthn kuriole3ia den yparxei kanenas elegxos , an k o monos elegxos poy uphrxe prin htan to file.good() , to opoio
+	einai arketa geniko . Den epsaksa na soy pw thn alh8eia , ean mporoume na enta3oume kapoion elegxo kata thn diarkeia
+	ths write an k 9ewrw pws einai ashmanto ka9ws gnwrizoyme akrivws to size twn bytes poy 9eloume na grapsoume.
+	Isws enas elegxos na htan na tsekaroume oti to width , height klp einai >0 prin mpoume sthn read. */
+	
 	outfile << "P6 " << w << "\n" << h << " " << "255\n";
 	outfile.write(&bytes[0], w*h * 3);
 	outfile.close();
