@@ -201,8 +201,12 @@ bool Image::load(const std::string & filename, const std::string & format) {
 	std::cout << std::endl;
 	
 	while (counter < 4) {
-
+		/*Skiping comments*/
 		if (infile.good()) {
+			if (infile.peek() == '#') {
+			while (infile.peek() != ' ' || infile.peek() != '\n') infile.get(); 
+			counter++;
+		} ////
 
 			if (infile.peek() != ' ' && infile.peek() != '\n') {
 				line += infile.get();
