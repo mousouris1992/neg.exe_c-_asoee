@@ -33,21 +33,29 @@ std::ifstream infile;
 	/*---------Reading_Bytes-------------------------*/
 	/*---Reading bytes to a char * array helps the procedure perform faster --*/
 	int size = (*w)*(*h) * 3;
+	
 	char * bytes = new char[size];
-
-
+	
 	infile.read(bytes, size); /*reading bytes from file, in a block of size [width]x[height]x[3]*/
-
+	infile.close();
+	
+	/* gia to ifstream.read() anaferei to wiki ths c++ oti afou teleiwsei to read, ean to EOF vre9hke prin to expected
+	size tou block poy eprepe na ginei read, tote 9etetai to failbit = true, opote mporoume na elegksoume kai etsi
+	ean to read() htan epituxes .*/
+	if (!infile.good()) {
+		std::cerr << "~[Error] /readPPM()/ : Error while reading Image's data , [width] x [height] x [3] size isn't compatible with the reading block !"<<std::endl;
+		std::cerr << "                       EOF reached at invalid position !" << std::endl;
+		return nullptr;
+	}
 	/* Checking if next byte is EOF , Afoy teleiwsei to read() , koitazoyme ean to epomeno akrivws byte einai to EOF
 	k efoson einai , tote ola leitourgoun swsta, mporeis na 9ewrhseis k auto san ena eidos poiohtikoy elegxou ean k den einai
 	ana byte */
-	
 	if (infile.peek() != EOF) { 
 		std::cerr << "~[Error] /readPPM()/ : Error occured while reading Image's data , [width] x [height] x [3] size isn't compatible with the read block !" << std::endl << std::endl;
 		return nullptr;
 	}
 
-	infile.close();
+	
 
 	/*---------Casting Char * bytes to float * Array-------------*/
 
@@ -134,7 +142,12 @@ bool imaging::WritePPM(const float * data, int w, int h, const char * filename) 
 	outfile << "P6 " << w << "\n" << h << " " << "255\n";
 	outfile.write(&bytes[0], w*h * 3);
 	outfile.close();
-
+	
+	/* elegxos after writitng */
+	if (!outfile.good()) {
+		std::cerr << "~[Error] /writePPM()/ : Error occured while writing data to the requested <ppm> file !" << std::endl;
+		return false;
+	}
 	return true;
 
 	/*Older Version_Writing byte one by one_much slower*/
