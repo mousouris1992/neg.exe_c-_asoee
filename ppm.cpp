@@ -10,19 +10,16 @@ using namespace imaging;
 
 float * imaging::ReadPPM(const char * filename, int * w, int * h) {
 
-
-	std::ifstream infile;
-
-	
-
+std::ifstream infile;
 
 	infile.open(filename, std::ifstream::binary);
 
 	if (!infile.is_open()) {
-		std::cerr << "~[Error] : Error while trying to open PPM file!" << std::endl;
+		std::cerr << "~[Error] /readPPM()/ : Error while trying to open PPM file!" << std::endl;
 		return nullptr;
 	}
 	/*------------------*/
+
 	int counter = 0;
 	while (counter < 4) { /*Skiping Header*/
 
@@ -32,13 +29,39 @@ float * imaging::ReadPPM(const char * filename, int * w, int * h) {
 		infile.get();
 	}
 
-	/* 1.0v Ylopoihsh me Linear dynamiko float* Array ----------------------------------*/
+	
+	/*---------Reading_Bytes-------------------------*/
+	/*---Reading bytes to a char * array helps the procedure perform faster --*/
 	int size = (*w)*(*h) * 3;
+	char * bytes = new char[size];
+
+
+	infile.read(bytes, size); /*reading bytes from file, in a block of size [width]x[height]x[3]*/
+
+	if (infile.peek() != EOF) { /* Checking if next byte is EOF */
+		std::cerr << "~[Error] /readPPM()/ : Error occured while reading Image's data , [width] x [height] x [3] size isn't compatible with the read block !" << std::endl << std::endl;
+		return nullptr;
+	}
+
+	infile.close();
+
+	/*---------Casting Char * bytes to float * Array-------------*/
+
 	float* f_array = new float[size];
 
+	for (int i = 0; i < size; i++) {
+		
+		f_array[i] = ((float)((unsigned char)bytes[i]))/255.0f;
+	}
+
+	//std::cout << "-[Report] : Total Bytes read : " << size << std::endl << "-[Report] : Total Pixels read : " << size/3 << std::endl << std::endl;
+
+	return f_array;
+
+	/*------------------Older version, reading byte by byte from file, a lot slower---------------
+	pixels = 0;
 	float temp_v;
 	unsigned char byte;
-	int pixels = 0;
 	int x = 0;
 
 	while (infile.peek() != EOF) {
@@ -49,32 +72,28 @@ float * imaging::ReadPPM(const char * filename, int * w, int * h) {
 			temp_v = ((float)byte) / 255.0f; 
 			
 			if (temp_v<0.0f || temp_v>1.0f) {
-				std::cerr << "~[Error] : Error occured while reading Image's Data, float_value : " << temp_v << " - got out of [0.0f,1.0f] bounds" << std::endl;
+				std::cerr << "~[Error] /readPPM()/ : Error occured while reading Image's Data, float_value : " << temp_v << " - got out of [0.0f,1.0f] bounds" << std::endl;
 				return nullptr;
 			}
 			f_array[x] = temp_v;
 			x++;
 		}
 		else {
-			std::cerr << "~[Error] : Error Occured while reading Image's Data!" << std::endl;
+			std::cerr << "~[Error] /readPPM()/ : Error Occured while reading Image's Data!" << std::endl;
 			return nullptr;
 		}
 		
 	}
 
-	pixels = x / 3;
-	std::cout << "-[Report] : Total Bytes read : " << x << std::endl << "-[Report] : Total Pixels read : " << pixels << std::endl << std::endl;
-
-	/* Checking float Array bounds */
+	/* Checking float Array bounds
 	if (x - 1 >= 3 * (*w)*(*h)) {
-		std::cerr << "~[Error] : Image <Data> array got out of expected bounds!" << std::endl;
-		std::cout << "~[Error] : Image <Data> array expected bounds : < " << 3 * (*w)*(*h) << std::endl;
-		std::cout << "~[Error] : Image <Data> array actual bounds : " << x - 1 << std::endl;
+		std::cerr << "~[Error] /readPPM()/ : Image <Data> array got out of expected bounds!" << std::endl;
+		std::cout << "~[Error] /readPPM()/ : Image <Data> array expected bounds : < " << 3 * (*w)*(*h) << std::endl;
+		std::cout << "~[Error] /readPPM()/ : Image <Data> array actual bounds : " << x - 1 << std::endl;
 		return nullptr;
 	}
-	return f_array;
-	/*------------------------------------------------------------------------------------*/
 
+	*/
 
 }
 
@@ -82,36 +101,60 @@ float * imaging::ReadPPM(const char * filename, int * w, int * h) {
 
 
 bool imaging::WritePPM(const float * data, int w, int h, const char * filename) {
-	if (data = nullptr) {
-		std::cerr << "Error, could not write neg file.\n";
-		return true;
+	if (data == nullptr) {
+		std::cerr << "~[Error] /WritePPM()/ : float * data points to nullptr !" << std::endl << std::endl;
+		return false;
 	}
-	
+
+	/* Intialising char * bytes Array that will help perform the writing procedure faster */
+	char * bytes = new char[w*h * 3];
+	for (int i = 0; i < w*h * 3; i++) {
+		bytes[i] = (char)data[i];
+	}
+
+	std::ofstream outfile;
+	outfile.open(filename, std::ios::binary);
+	if (!outfile.is_open()) {
+		std::cerr << "~[Error] /WritePPM()/ : Error occured while trying to open new File !" << std::endl << std::endl;
+		return false;
+	}
+
+	/*Writing Header*/
+	outfile << "P6 " << w << "\n" << h << " " << "255\n";
+	outfile.write(&bytes[0], w*h * 3);
+	outfile.close();
+
+	return true;
+
+	/*Older Version_Writing byte one by one_much slower*/
+
+	/*float temp;
+	char byte;
+	for (int i = 0; i < w*h * 3; i++) {
+		if (!outfile.good()) {
+			std::cerr << "~[Error] /WritePPM()/ : Error occured while trying to write the image data to File !" << std::endl<<std::endl;
+			return false;
+		}
+		temp = data[i] * 255.0f;
+		byte = (char)temp;
+		outfile << byte;	
+	}*/
+
+
+	/*-----------------YLOPOIHSH_ALEX------------------
+	if (data = nullptr) {
+	std::cerr << "Error, could not write neg file.\n";
+	return true;
+	}
+
 	std::ofstream outfile; // starting open file operation
-	
+
 	// New name of the file that will be written. Kind(!) of like: Image01_neg.ppm
 	std::string newfilename = filename;
 	size_t pos = newfilename.find(".");
 	newfilename.substr(pos)+="_neg.ppm"; // NA PEIRAMATISTW STO DEV NA KSERW OTI EINAI SWSTO
 
 	outfile.open(newfilename, std::ofstream::out);
-	
-	/*
-	std::ofstream outfile;
-	outfile.open(filename, std::ios::binary);
-
-	outfile << "P6 " << w << " " << h << " " << "255 ";
-	float temp;
-	char byte;
-	for (int i = 0; i < w*h * 3; i++) {
-		temp = data[i] * 255.0f;
-		byte = (char)temp;
-		outfile << byte;
-	}
-	
-	return true;
 	*/
-
-	return true;
 }
 
